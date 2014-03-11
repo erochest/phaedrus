@@ -1,8 +1,6 @@
-{-# LANGUAGE OverloadedStrings #-}
 
 
-module Main where
+module Phaedrus
+    (
+    ) where
 
-
-main :: IO ()
-main = undefined
