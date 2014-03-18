@@ -17,7 +17,7 @@ data PhaedrusOpts = PhO
 
 
 phaedrus :: PhaedrusOpts -> IO ()
-phaedrus PhO{ phoVersion = True } = do
+phaedrus PhO{ phoVersion = True } =
     putStrLn $ "phaedrus: version " ++ showVersion version
 
 
