@@ -13,6 +13,39 @@ maintainer:          erochest@virginia.edu
 -- category:            
 build-type:          Simple
 -- extra-source-files:  
+data-files:          data/Alc__1.xml
+                   , data/Alc__2.xml
+                   , data/Apol_.xml
+                   , data/Charm_.xml
+                   , data/Cleit_.xml
+                   , data/Crat_.xml
+                   , data/Criti_.xml
+                   , data/Crito.xml
+                   , data/Epin_.xml
+                   , data/Euthyd_.xml
+                   , data/Euthyph_.xml
+                   , data/Gorg_.xml
+                   , data/Hipp__Maj_.xml
+                   , data/Hipp__Min_.xml
+                   , data/Hipparch_.xml
+                   , data/Ion.xml
+                   , data/Lach_.xml
+                   , data/Lovers.xml
+                   , data/Lysis.xml
+                   , data/Menex_.xml
+                   , data/Meno.xml
+                   , data/Minos.xml
+                   , data/Parm_.xml
+                   , data/Phaedo.xml
+                   , data/Phaedrus.xml
+                   , data/Phileb_.xml
+                   , data/Prot_.xml
+                   , data/Soph_.xml
+                   , data/Stat_.xml
+                   , data/Sym_.xml
+                   , data/Theaet_.xml
+                   , data/Theag_.xml
+                   , data/Tim_.xml
 cabal-version:       >=1.10
 
 library
