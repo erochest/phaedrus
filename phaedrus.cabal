@@ -50,8 +50,21 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Phaedrus
+                     , Phaedrus.Output
+                     , Phaedrus.Split
+                     , Phaedrus.Types
+                     , Phaedrus.XML.Utils
   -- other-modules:       
   build-depends:       base >=4.6 && <4.7
+                     , conduit
+                     , dlist
+                     , lens
+                     , system-fileio
+                     , system-filepath
+                     , text
+                     , unordered-containers
+                     , xml-conduit
+                     , xml-types
   default-language:    Haskell2010
 
 executable phaedrus
@@ -60,22 +73,16 @@ executable phaedrus
   -- other-extensions:    
   build-depends:       base >=4.6 && <4.7
                      , phaedrus
-                     , optparse-applicative
-                     , errors
-                     , monad-logger
+                     , conduit
                      , dlist
-                     , unordered-containers
-                     , hastache
-                     , csv-conduit
                      , lens
-                     , xml-lens
+                     , optparse-applicative
+                     , system-fileio
+                     , system-filepath
+                     , text
+                     , unordered-containers
                      , xml-conduit
                      , xml-types
-                     , conduit
-                     , system-filepath
-                     , system-fileio
-                     , text
-                     , text-icu
   -- hs-source-dirs:      
   default-language:    Haskell2010
 
