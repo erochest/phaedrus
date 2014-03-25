@@ -62,7 +62,7 @@ splitDocument division chunkSpec inputPath xmlText =
          ) $ foldEvents (onElement division) initFoldState xmlText
     where chunk' = uncurry chunk chunkSpec
           base   = basename inputPath
-          split' = uncurry $ \d -> zipWith (Split base d) [0..]
+          split' = uncurry $ \d -> zipWith (Split base d False) [0..]
 
 -- Walking over the elements
 
