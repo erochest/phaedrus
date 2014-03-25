@@ -16,6 +16,7 @@ import qualified Data.List                 as L
 import           Filesystem.Path.CurrentOS
 import           Prelude                   hiding (FilePath)
 
+import           Phaedrus.Text.BetaCode
 import           Phaedrus.Types
 import           Phaedrus.XML
 
@@ -65,12 +66,15 @@ tests = testGroup "phaedrus"
         testFirst "data/Apol_.xml" $ (text1 @=?) . _tlText
         testN 1 "data/Apol_.xml" $ (text2 @=?) . _tlText
         testFirst "data/Charm_.xml" $ (text3 @=?) . _tlText
+    , testCase "title normalization and comparison" $
+        testFirst "data/Alc__2.xml" $
+            (betanorm alc2 @=?) . betanorm . _tlTitle
     ]
 
 main :: IO ()
 main = defaultMain tests
 
-text1, text2, text3 :: T.Text
+text1, text2, text3, alc2 :: T.Text
 
 text1 = "ὅτι μὲν ὑμεῖς, ὦ ἄνδρες Ἀθηναῖοι, πεπόνθατε ὑπὸ τῶν ἐμῶν κατηγόρων, \
 \οὐκ οἶδα: ἐγὼ δ᾽ οὖν καὶ αὐτὸς ὑπ᾽ αὐτῶν ὀλίγου ἐμαυτοῦ ἐπελαθόμην, οὕτω \
@@ -91,4 +95,6 @@ text3 = "ἥκομεν τῇ προτεραίᾳ ἑσπέρας ε�
 \τὴν Ταυρέου παλαίστραν τὴν καταντικρὺ τοῦ τῆς Βασίλης ἱεροῦ εἰσῆλθον, καὶ \
 \αὐτόθι κατέλαβον πάνυ πολλούς, τοὺς μὲν καὶ ἀγνῶτας ἐμοί, τοὺς δὲ πλείστους \
 \γνωρίμους. καί με ὡς"
+
+alc2 = "\7944\955\954\953\946\953\940\948\951\962 \946"
 

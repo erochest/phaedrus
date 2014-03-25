@@ -52,11 +52,13 @@ library
   exposed-modules:     Phaedrus
                      , Phaedrus.Output
                      , Phaedrus.Split
+                     , Phaedrus.Text.BetaCode
                      , Phaedrus.Types
                      , Phaedrus.XML
                      , Phaedrus.XML.Utils
   -- other-modules:       
   build-depends:       base >=4.6 && <4.7
+                     , attoparsec
                      , conduit
                      , dlist
                      , errors
@@ -64,6 +66,7 @@ library
                      , system-fileio
                      , system-filepath
                      , text
+                     , text-icu
                      , unordered-containers
                      , xml-conduit
                      , xml-types
@@ -103,8 +106,8 @@ test-suite phaedrus-specs
                        , tasty-hunit
                        , HUnit
                        , phaedrus
-                       , system-filepath
                        , errors
+                       , system-filepath
                        , text
   default-language:    Haskell2010
 
