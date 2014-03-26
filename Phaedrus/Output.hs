@@ -29,7 +29,7 @@ saveSplit dataDir split =
 makeFileName :: FilePath -> Split -> FilePath
 makeFileName dir Split{..} =
     dir </> FS.fromText (T.intercalate "-" parts) <.> "txt"
-    where parts = [ toText' _splitPath
+    where parts = [ toText' (basename _splitPath)
                   , clean _splitId
                   , tshow _splitN
                   ]
