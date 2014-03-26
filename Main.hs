@@ -2,7 +2,6 @@
 {-# LANGUAGE RecordWildCards   #-}
 
 
--- TODO: group on Division
 -- TODO: fabfile
 -- TODO: JSON description
 -- TODO: Script monad (ErrorT IO)
@@ -75,30 +74,33 @@ phaedrus pho@PhO{..} = do
 
     splits <- fmap concat . forM files $ \xml -> do
         tlocs' <- fileToTextLoc xml
-        let tlocs   = maybe tlocs' (`tagEvidence` tlocs') eset
-            tokens  = concatMap tokenizeTextLoc tlocs
-            windows = window phoWindow phoOffset tokens
         return . mapMaybe (uncurry (textLocsToSplit phoDivision))
-               $ zip [1..] windows
+               . zip [1..]
+               . concatMap ( window phoWindow phoOffset
+                           . concatMap tokenizeTextLoc)
+               . divideTextLocs phoDivision
+               $ maybe tlocs' (`tagEvidence` tlocs') eset
 
     mapM_ (saveSplit dataDir) splits
-    (evidence, nonEvidence) <- makeTrainingSet phoTrainingSize
-                                                phoEvidenceRatio
-                                                _splitEvidence
-                                                splits
-    let evidenceDir    = phoOutput' </> "evidence"
-        nonEvidenceDir = phoOutput' </> "non-evidence"
-    createTree evidenceDir
-    createTree nonEvidenceDir
 
-    putStrLn $ "Saving " ++ show (length evidence) ++ " chunks as evidence."
-    mapM_ (saveSplit evidenceDir) evidence
-    putStrLn $  "Saving " ++ show (length nonEvidence)
-             ++ " chunks as non-evidence."
-    mapM_ (saveSplit nonEvidenceDir) nonEvidence
+    when (isJust phoEvidenceFile) $ do
+        (evidence, nonEvidence) <- makeTrainingSet phoTrainingSize
+                                                    phoEvidenceRatio
+                                                    _splitEvidence
+                                                    splits
+        let evidenceDir    = phoOutput' </> "evidence"
+            nonEvidenceDir = phoOutput' </> "non-evidence"
+        createTree evidenceDir
+        createTree nonEvidenceDir
 
-    where phoOutput'    = fromMaybe "." phoOutput
-          dataDir       = phoOutput' </> "data"
+        putStrLn $ "Saving " ++ show (length evidence) ++ " chunks as evidence."
+        mapM_ (saveSplit evidenceDir) evidence
+        putStrLn $  "Saving " ++ show (length nonEvidence)
+                ++ " chunks as non-evidence."
+        mapM_ (saveSplit nonEvidenceDir) nonEvidence
+
+    where phoOutput' = fromMaybe "." phoOutput
+          dataDir    = phoOutput' </> "data"
 
 
 main :: IO ()
