@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
@@ -24,13 +25,25 @@ module Phaedrus.Types
     , tlSection
     , tlEvidence
     , tlText
+    , EvidencePoint(..)
+    , epTitle
+    , epSection
+    , EvidenceSet
+    , BetaCode
+    , unBeta
+    , toBeta
     ) where
 
 
 import           Control.Lens
+import           Data.Hashable
+import qualified Data.HashSet              as S
 import           Data.Text
 import           Filesystem.Path.CurrentOS
+import           GHC.Generics              (Generic)
 import           Prelude                   hiding (FilePath)
+
+import           Phaedrus.Text.BetaCode    (BetaCode, toBeta, unBeta)
 
 
 data Division = Document | Section | Page | Speaking
@@ -68,4 +81,15 @@ data TextLoc
         , _tlText     :: !Text
         } deriving (Show)
 $(makeLenses ''TextLoc)
+
+data EvidencePoint
+        = Evidence
+        { _epTitle   :: !BetaCode
+        , _epSection :: !Text
+        } deriving (Eq, Show, Generic)
+$(makeLenses ''EvidencePoint)
+
+instance Hashable EvidencePoint
+
+type EvidenceSet = S.HashSet EvidencePoint
 

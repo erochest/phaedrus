@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 
@@ -7,6 +8,10 @@ module Phaedrus.Text.BetaCode
     , fromBetaIgnore
     , normalizeChars
     , betanorm
+    , clean
+    , BetaCode
+    , unBeta
+    , toBeta
     ) where
 
 
@@ -14,11 +19,15 @@ import           Control.Applicative
 import           Control.Error
 import           Data.Attoparsec.Text
 import           Data.Char
+import           Data.Hashable
 import           Data.Monoid
+import           Data.String
 import qualified Data.Text               as T
 import           Data.Text.ICU.Normalize
 import           Data.Text.Lazy          (toStrict)
 import           Data.Text.Lazy.Builder
+import qualified Data.Text.Lazy.Builder  as B
+import           GHC.Generics            (Generic)
 
 
 -- BetaCode conversion
@@ -100,7 +109,7 @@ sigma = do
                else '\x03c3'
 
 diacritics :: Parser Builder
-diacritics = fromString <$> many' diacritic
+diacritics = B.fromString <$> many' diacritic
 
 upperseq :: Parser Builder
 upperseq = char '*' *> ((<>) <$> (flip (<>) <$> diacritics
@@ -143,4 +152,48 @@ normalizeChars = normalize NFC
 
 betanorm :: T.Text -> T.Text
 betanorm = normalizeChars . fromBetaIgnore
+
+clean :: T.Text -> T.Text
+clean = T.filter (\c -> isAscii c && isAlphaNum c) . T.map cchar
+
+cchar :: Char -> Char
+cchar '\x03b1' = 'a'
+cchar '\x03b2' = 'b'
+cchar '\x03b3' = 'g'
+cchar '\x03b4' = 'd'
+cchar '\x03b5' = 'e'
+cchar '\x03b6' = 'z'
+cchar '\x03b7' = 'h'
+cchar '\x03b8' = 'q'
+cchar '\x03b9' = 'i'
+cchar '\x03ba' = 'k'
+cchar '\x03bb' = 'l'
+cchar '\x03bc' = 'm'
+cchar '\x03bd' = 'n'
+cchar '\x03be' = 'c'
+cchar '\x03bf' = 'o'
+cchar '\x03c0' = 'p'
+cchar '\x03c1' = 'r'
+cchar '\x03c2' = 's'
+cchar '\x03c3' = 's'
+cchar '\x03c4' = 't'
+cchar '\x03c5' = 'u'
+cchar '\x03c6' = 'f'
+cchar '\x03c7' = 'x'
+cchar '\x03c8' = 'y'
+cchar '\x03c9' = 'w'
+cchar '\x03dd' = 'v'
+cchar '\x03f2' = 's'
+cchar c        = c
+
+newtype BetaCode = BC { unBeta :: T.Text }
+                   deriving (Eq, Show, Generic)
+
+instance Hashable BetaCode
+
+toBeta :: T.Text -> BetaCode
+toBeta = BC . clean . normalizeChars
+
+instance IsString BetaCode where
+    fromString = toBeta . T.pack
 
