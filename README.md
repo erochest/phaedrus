@@ -1,6 +1,8 @@
 
 # `phaedrus`
 
+[![Build Status](https://travis-ci.org/erochest/phaedrus.svg?branch=master)](https://travis-ci.org/erochest/phaedrus)
+
 This reads a corpus to TEI document fragments, extracts the text from them, and
 chops them up into overlapping chunks of standard sizes.
 
