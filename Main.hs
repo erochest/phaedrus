@@ -2,7 +2,9 @@
 {-# LANGUAGE RecordWildCards   #-}
 
 
+-- TODO: stoplists
 -- TODO: fabfile
+-- TODO: Travis CI
 -- TODO: JSON description
 -- TODO: Script monad (ErrorT IO)
 -- TODO: refactor
