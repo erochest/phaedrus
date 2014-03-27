@@ -217,7 +217,7 @@ draw from will be large, say 1000.
 ## Get involved!
 
 Please report bugs via the [github issue
-tracker](https://github.com/scholarslab/NeatlineFeatures/issues).
+tracker](https://github.com/erochest/phaedrus/issues).
 
 Master github repository:
 
