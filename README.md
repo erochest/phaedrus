@@ -30,40 +30,42 @@ unzip ~/Downloads/phaedrus-0.1.0.0.zip
 Asking `phaedrus` for help generates this message (cleaned up and reformatted
 somewhat).
 
-> phaedrus v0.1.0.0: dialogue dataset generator
->
-> Usage: phaedrus [-V|--version] [-d|--data-dir ARG] (-o|--output-dir ARG)
->                 [-D|--division ARG] [-w|--window ARG] [-O|--offset ARG]
->   Generate a training/test/dataset from the Dialogues.
->
-> Available options:
->   -h,--help                Show this help text
->   -V,--version             Display the version information.
->   -d,--data-dir ARG        The directory for the data
->                            (default = /usr/local/share/x86_64-osx-ghc-7.6.3/phaedrus-0.1.0.0/data).
->   -o,--output-dir ARG      The output directory.
->   -D,--division ARG        How to divide the document. One of [D]ocument,
->                            [Se]ction, [P]age, or [Sp]eaking. (The brackets
->                            represent an abbreviation for that option.
->                            Default is 'Document.')
->   -w,--window ARG          The size of the window for the output chunks
->                            (default = 500).
->   -O,--offset ARG          The offset between the beginning of each window
->                            (default = 250).
->   -e,--evidence EVIDENCE-FILE The optional CSV file listing the
->                            evidentiary sections. Each line lists the
->                            dialogue title and the section (using the Latin
->                            alphabet).
->   -t,--training-size TRAINING-SIZE The default size for the training set,
->                            including both evidence and non-evidence groups.
->                            Default is 100.
->   -r,--evidence-ratio EVIDENCE-RATIO The amount of the training set to
->                            devote to evidence. For example, if
->                            TRAINING-SIZE is 100 and EVIDENCE-RATIO is 0.3,
->                            this will try to have 30 examples of evidence
->                            in the training set. if there's not enough to
->                            do this, then the training size is decreased.
->                            Default is 0.5.
+```
+phaedrus v0.1.0.0: dialogue dataset generator
+
+Usage: phaedrus [-V|--version] [-d|--data-dir ARG] (-o|--output-dir ARG)
+                [-D|--division ARG] [-w|--window ARG] [-O|--offset ARG]
+  Generate a training/test/dataset from the Dialogues.
+
+Available options:
+  -h,--help                Show this help text
+  -V,--version             Display the version information.
+  -d,--data-dir ARG        The directory for the data
+                           (default = /usr/local/share/x86_64-osx-ghc-7.6.3/phaedrus-0.1.0.0/data).
+  -o,--output-dir ARG      The output directory.
+  -D,--division ARG        How to divide the document. One of [D]ocument,
+                           [Se]ction, [P]age, or [Sp]eaking. (The brackets
+                           represent an abbreviation for that option.
+                           Default is 'Document.')
+  -w,--window ARG          The size of the window for the output chunks
+                           (default = 500).
+  -O,--offset ARG          The offset between the beginning of each window
+                           (default = 250).
+  -e,--evidence EVIDENCE-FILE The optional CSV file listing the
+                           evidentiary sections. Each line lists the
+                           dialogue title and the section (using the Latin
+                           alphabet).
+  -t,--training-size TRAINING-SIZE The default size for the training set,
+                           including both evidence and non-evidence groups.
+                           Default is 100.
+  -r,--evidence-ratio EVIDENCE-RATIO The amount of the training set to
+                           devote to evidence. For example, if
+                           TRAINING-SIZE is 100 and EVIDENCE-RATIO is 0.3,
+                           this will try to have 30 examples of evidence
+                           in the training set. if there's not enough to
+                           do this, then the training size is decreased.
+                           Default is 0.5.
+```
 
 We'll go into these options individually in more detail below as we discuss the
 tasks that `phaedrus` can perform.
@@ -80,7 +82,9 @@ ZIP file and placed in a directory where `phaedrus` will look for it. However,
 if the program has trouble finding the files or your move them, you can specify
 their location with the `-d` or `--data-dir` options.
 
-> phaedrus --data-dir /somewhere/else/data
+```
+phaedrus --data-dir /somewhere/else/data
+```
 
 ### Output Directory
 
@@ -89,7 +93,9 @@ create a number of subdirectories in this containing the chunked data files as
 well as the evidence and non-evidence directories for the test- and
 training-sets.
 
-> phaedrus --output ./large-chunks
+```
+phaedrus --output ./large-chunks
+```
 
 ### Chopping up Documents
 
@@ -103,7 +109,9 @@ defaults to `500`.
 The overlap is changed using the `-O` or `--offset` parameters. This defaults
 to `250`.
 
-> phaedrus --window 100 --offset 25
+```
+phaedrus --window 100 --offset 25
+```
 
 You can also change the largest level of container that gets split up. You do
 this with the `-D` or `--division` parameters. Here are the options for this:
@@ -120,10 +128,12 @@ this with the `-D` or `--division` parameters. Here are the options for this:
 
 Here are some examples of different calls using this:
 
-> phaedrus --division document
-> phaedrus --division section
-> phaedrus --division page
-> phaedrus --division speaker
+```
+phaedrus --division document
+phaedrus --division section
+phaedrus --division page
+phaedrus --division speaker
+```
 
 ## Generating Test/Training Sets
 
@@ -159,7 +169,9 @@ For example:
 
 To specify the evidence file, use the `-e` or `--evidence` parameters:
 
-> phaedrus --evidence evidence-file-name.csv
+```
+phaedrus --evidence evidence-file-name.csv
+```
 
 ### Training Size
 
@@ -167,7 +179,9 @@ You can specify the maximum number of documents to include in the
 test-/training-set by using the `-t` or `--training-size` parameters. It
 defaults to `100`.
 
-> phaedrus --training-size 4000
+```
+phaedrus --training-size 4000
+```
 
 ### Evidence Ratio
 
@@ -176,7 +190,9 @@ evidence chunks using the `-r` and `--evidence-ratio` parameters. This defaults
 to `0.3`, which means that evidence chunks will make up 30% of the
 training-set.
 
-> phaedrus --evidence-ratio 0.5
+```
+phaedrus --evidence-ratio 0.5
+```
 
 ### The Actual Training Set Size
 
