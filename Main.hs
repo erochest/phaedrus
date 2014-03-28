@@ -90,8 +90,8 @@ phaedrus pho@PhO{..} = do
                                                     phoEvidenceRatio
                                                     _splitEvidence
                                                     splits
-        let evidenceDir    = phoOutput' </> "evidence"
-            nonEvidenceDir = phoOutput' </> "non-evidence"
+        let evidenceDir    = phoOutput' </> "training" </> "evidence"
+            nonEvidenceDir = phoOutput' </> "training" </> "non-evidence"
         createTree evidenceDir
         createTree nonEvidenceDir
 
