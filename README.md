@@ -96,7 +96,7 @@ well as the evidence and non-evidence directories for the test- and
 training-sets.
 
 ```
-phaedrus --output ./large-chunks
+phaedrus --output-dir ./large-chunks
 ```
 
 ### Chopping up Documents
@@ -189,11 +189,11 @@ phaedrus --training-size 4000
 
 You can also specify how much of the test- and training-sets are comprised of
 evidence chunks using the `-r` and `--evidence-ratio` parameters. This defaults
-to `0.3`, which means that evidence chunks will make up 30% of the
+to `0.5`, which means that evidence chunks will make up 50% of the
 training-set.
 
 ```
-phaedrus --evidence-ratio 0.5
+phaedrus --evidence-ratio 0.3
 ```
 
 ### The Actual Training Set Size
