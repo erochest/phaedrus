@@ -14,7 +14,10 @@ module Main where
 import           Control.Error
 import           Control.Monad
 import           Data.Char                 (toLower)
+import qualified Data.HashMap.Strict       as M
+import qualified Data.List                 as L
 import           Data.Maybe
+import           Data.Ord
 import qualified Data.Text                 as T
 import           Data.Version
 import           Filesystem
@@ -91,6 +94,18 @@ phaedrus pho@PhO{..} = do
     createTree freqDir
     sequence_ $ zipWith (saveDocumentFrequencies freqDir) splits freqs
 
+    putStrLn $ "Saving stop lists."
+    createTree stopDir
+    saveLines (stopDir </> "top.200")
+        . map fst
+        . take 200
+        . L.sortBy (comparing $ Down . _freqTotal . snd)
+        . M.toList
+        $ _corpusTypes corpus
+    forM_ [1..5] $ \n ->
+        let filename = stopDir </> decodeString ("count." ++ show n)
+        in  saveFrequency filename n corpus
+
     when (isJust phoEvidenceFile) $ do
         (evidence, nonEvidence) <- makeTrainingSet phoTrainingSize
                                                     phoEvidenceRatio
@@ -111,6 +126,7 @@ phaedrus pho@PhO{..} = do
           dataDir    = phoOutput' </> "data"
           freqFile   = phoOutput' </> "frequencies.csv"
           freqDir    = phoOutput' </> "freqs"
+          stopDir    = phoOutput' </> "stop-lists"
 
 
 main :: IO ()

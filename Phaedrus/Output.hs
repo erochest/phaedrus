@@ -6,13 +6,15 @@ module Phaedrus.Output
     ( saveSplit
     , saveFrequencies
     , saveDocumentFrequencies
+    , saveLines
+    , saveFrequency
     ) where
 
 
 import           Control.Applicative
 import qualified Data.Char                 as C
 import qualified Data.HashMap.Strict       as M
-import           Data.List                 (foldl', sortBy)
+import           Data.List                 (foldl', sort, sortBy)
 import           Data.Monoid
 import           Data.Ord
 import qualified Data.Text                 as T
@@ -77,4 +79,16 @@ saveDocumentFrequencies dir split freqs =
     where row (token, (raw, scaled)) =
             T.intercalate "," [token, tshow raw, tshow scaled] <> "\n"
           header = "Token,Raw Frequency,TF-IDF\n"
+
+saveLines :: FilePath -> [T.Text] -> IO ()
+saveLines fp = writeTextFile fp . T.unlines
+
+saveFrequency :: FilePath -> Int -> Corpus T.Text -> IO ()
+saveFrequency fp n =
+    saveLines fp
+        . sort
+        . map fst
+        . filter ((== n) . _freqTotal . snd)
+        . M.toList
+        . _corpusTypes
 
