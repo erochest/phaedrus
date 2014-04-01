@@ -54,6 +54,7 @@ library
                      , Phaedrus.Output
                      , Phaedrus.Split
                      , Phaedrus.Text.BetaCode
+                     , Phaedrus.Text.TfIdf
                      , Phaedrus.Text.Tokens
                      , Phaedrus.Types
                      , Phaedrus.Utils
@@ -70,6 +71,7 @@ library
                      , errors
                      , hashable
                      , lens
+                     , mtl
                      , mwc-random
                      , system-fileio
                      , system-filepath

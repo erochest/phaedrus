@@ -32,13 +32,24 @@ module Phaedrus.Types
     , BetaCode
     , unBeta
     , toBeta
+    , FreqPair(..)
+    , freqTotal
+    , freqDoc
+    , Frequencies
+    , Corpus(..)
+    , corpusDocuments
+    , corpusTypes
+    , Document
     ) where
 
 
 import           Control.Lens
 import           Data.Hashable
+import qualified Data.HashMap.Strict       as M
 import qualified Data.HashSet              as S
+import           Data.Monoid
 import           Data.Text
+import qualified Data.Vector.Unboxed       as V
 import           Filesystem.Path.CurrentOS
 import           GHC.Generics              (Generic)
 import           Prelude                   hiding (FilePath)
@@ -92,4 +103,25 @@ $(makeLenses ''EvidencePoint)
 instance Hashable EvidencePoint
 
 type EvidenceSet = S.HashSet EvidencePoint
+
+type Frequencies a = M.HashMap a Int
+
+data FreqPair = FreqPair
+              { _freqTotal :: !Int
+              , _freqDoc   :: !Int
+              } deriving (Show)
+$(makeLenses ''FreqPair)
+
+instance Monoid FreqPair where
+    mempty = FreqPair 0 0
+    a `mappend` b = FreqPair (_freqTotal a + _freqTotal b)
+                             (_freqDoc   a + _freqDoc   b)
+
+data Corpus a = Corpus
+              { _corpusDocuments :: !Int
+              , _corpusTypes     :: !(M.HashMap a FreqPair)
+              }
+$(makeLenses ''Corpus)
+
+type Document a = [a]
 

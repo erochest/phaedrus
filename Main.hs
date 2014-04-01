@@ -2,9 +2,7 @@
 {-# LANGUAGE RecordWildCards   #-}
 
 
--- TODO: stoplists
 -- TODO: fabfile
--- TODO: Travis CI
 -- TODO: JSON description
 -- TODO: Script monad (ErrorT IO)
 -- TODO: refactor
@@ -29,6 +27,7 @@ import           Prelude                   hiding (FilePath)
 import           Phaedrus.Evidence
 import           Phaedrus.Output
 import           Phaedrus.Split
+import           Phaedrus.Text.TfIdf
 import           Phaedrus.Text.Tokens
 import           Phaedrus.Types
 import           Phaedrus.XML
@@ -85,6 +84,13 @@ phaedrus pho@PhO{..} = do
 
     mapM_ (saveSplit dataDir) splits
 
+    putStrLn $ "Saving frequencies file to " ++ encodeString freqFile
+    let (corpus, freqs) = processTfIdf
+                        $ map (fmap T.toLower . tokenize . _splitText) splits
+    saveFrequencies freqFile corpus freqs
+    createTree freqDir
+    sequence_ $ zipWith (saveDocumentFrequencies freqDir) splits freqs
+
     when (isJust phoEvidenceFile) $ do
         (evidence, nonEvidence) <- makeTrainingSet phoTrainingSize
                                                     phoEvidenceRatio
@@ -103,6 +109,8 @@ phaedrus pho@PhO{..} = do
 
     where phoOutput' = fromMaybe "." phoOutput
           dataDir    = phoOutput' </> "data"
+          freqFile   = phoOutput' </> "frequencies.csv"
+          freqDir    = phoOutput' </> "freqs"
 
 
 main :: IO ()
