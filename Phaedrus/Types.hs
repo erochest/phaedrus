@@ -1,10 +1,15 @@
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE DeriveFunctor              #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE TemplateHaskell            #-}
 
 
 module Phaedrus.Types
-    ( Division(..)
+    ( Phaedrus(..)
+    , runPhaedrus
+    , PhaedrusOpts(..)
+    , Division(..)
     , WindowSize
     , WindowOffset
     , WindowSpec
@@ -43,7 +48,10 @@ module Phaedrus.Types
     ) where
 
 
+import           Control.Applicative
+import           Control.Error
 import           Control.Lens
+import           Control.Monad.IO.Class
 import           Data.Hashable
 import qualified Data.HashMap.Strict       as M
 import qualified Data.HashSet              as S
@@ -56,6 +64,29 @@ import           Prelude                   hiding (FilePath)
 
 import           Phaedrus.Text.BetaCode    (BetaCode, toBeta, unBeta)
 
+
+newtype Phaedrus a = Phaedrus { unPhaedrus :: Script a }
+                     deriving (Functor, Applicative, Monad, MonadIO)
+
+
+data PhaedrusOpts
+        = PhO
+        { phoVersion       :: !Bool
+        , phoDataDir       :: !FilePath
+        , phoOutput        :: !(Maybe FilePath)
+        , phoDivision      :: !Division
+        , phoWindow        :: !WindowSize
+        , phoOffset        :: !WindowOffset
+        , phoEvidenceFile  :: !(Maybe FilePath)
+        , phoTrainingSize  :: !Int
+        , phoEvidenceRatio :: !Double
+        } deriving (Eq, Show)
+
+
+data Hole = Hole
+
+runPhaedrus :: Phaedrus a -> IO a
+runPhaedrus = runScript . unPhaedrus
 
 data Division = Document | Section | Page | Speaking
               deriving (Show, Read, Eq, Enum)

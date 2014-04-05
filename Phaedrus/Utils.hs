@@ -4,16 +4,22 @@ module Phaedrus.Utils
     ( shuffle
     , tshow
     , toText'
+    , phaedrusIO
+    , putStrLn'
     ) where
 
 
+import           Control.Error
 import           Control.Monad
+import Control.Monad.Trans.Class
 import           Data.Array.IO
 import qualified Data.Text                 as T
 import           Filesystem.Path.CurrentOS
 import qualified Filesystem.Path.CurrentOS as FS
 import           Prelude                   hiding (FilePath)
 import           System.Random.MWC
+
+import           Phaedrus.Types
 
 
 -- | This shuffles a list. This implementation is adapted from
@@ -38,4 +44,12 @@ tshow = T.pack . show
 
 toText' :: FilePath -> T.Text
 toText' = either id id . FS.toText
+
+data Hole = Hole
+
+phaedrusIO :: IO a -> Phaedrus a
+phaedrusIO = Phaedrus . scriptIO
+
+putStrLn' :: String -> Phaedrus ()
+putStrLn' = phaedrusIO . putStrLn
 

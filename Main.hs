@@ -13,6 +13,7 @@ module Main where
 
 import           Control.Error
 import           Control.Monad
+import           Control.Monad.IO.Class
 import           Data.Char                 (toLower)
 import qualified Data.HashMap.Strict       as M
 import qualified Data.List                 as L
@@ -33,24 +34,9 @@ import           Phaedrus.Split
 import           Phaedrus.Text.TfIdf
 import           Phaedrus.Text.Tokens
 import           Phaedrus.Types
+import           Phaedrus.Utils
 import           Phaedrus.XML
 
-
-data PhaedrusOpts
-        = PhO
-        { phoVersion       :: !Bool
-        , phoDataDir       :: !FilePath
-        , phoOutput        :: !(Maybe FilePath)
-        , phoDivision      :: !Division
-        , phoWindow        :: !WindowSize
-        , phoOffset        :: !WindowOffset
-        , phoEvidenceFile  :: !(Maybe FilePath)
-        , phoTrainingSize  :: !Int
-        , phoEvidenceRatio :: !Double
-        } deriving (Eq, Show)
-
-
-data Hole = Hole
 
 defaultTrainingSize :: Int
 defaultTrainingSize = 100
@@ -59,24 +45,24 @@ defaultEvidenceRatio :: Double
 defaultEvidenceRatio = 0.5
 
 
-phaedrus :: PhaedrusOpts -> IO ()
+phaedrus :: PhaedrusOpts -> Phaedrus ()
 
 phaedrus PhO{ phoVersion = True } =
-    putStrLn $ "phaedrus: version " ++ showVersion version
+    putStrLn' $ "phaedrus: version " ++ showVersion version
 
 phaedrus PhO{ phoOutput = Nothing } =
-    putStrLn "You must specify an output directory."
+    putStrLn' "You must specify an output directory."
 
 phaedrus pho@PhO{..} = do
-    createTree dataDir
-    files <- filter (`hasExtension` "xml") <$> listDirectory phoDataDir
+    liftIO $ createTree dataDir
+    files <- liftIO $ filter (`hasExtension` "xml") <$> listDirectory phoDataDir
 
-    putStrLn $ "Saving data files to " ++ encodeString phoOutput'
-    eset <- maybe (putStrLn "No evidence file. Skipping." >> return Nothing)
-                  (fmap hush . readEvidence)
+    putStrLn' $ "Saving data files to " ++ encodeString phoOutput'
+    eset <- maybe (putStrLn' "No evidence file. Skipping." >> return Nothing)
+                  (liftIO . fmap hush . readEvidence)
                   phoEvidenceFile
 
-    splits <- fmap concat . forM files $ \xml -> do
+    splits <- liftIO . fmap concat . forM files $ \xml -> do
         tlocs' <- fileToTextLoc xml
         return . mapMaybe (uncurry (textLocsToSplit phoDivision))
                . zip [1..]
@@ -85,18 +71,18 @@ phaedrus pho@PhO{..} = do
                . divideTextLocs phoDivision
                $ maybe tlocs' (`tagEvidence` tlocs') eset
 
-    mapM_ (saveSplit dataDir) splits
+    liftIO $ mapM_ (saveSplit dataDir) splits
 
-    putStrLn $ "Saving frequencies file to " ++ encodeString freqFile
+    putStrLn' $ "Saving frequencies file to " ++ encodeString freqFile
     let (corpus, freqs) = processTfIdf
                         $ map (fmap T.toLower . tokenize . _splitText) splits
-    saveFrequencies freqFile corpus freqs
-    createTree freqDir
-    sequence_ $ zipWith (saveDocumentFrequencies freqDir) splits freqs
+    liftIO $ saveFrequencies freqFile corpus freqs
+    liftIO $ createTree freqDir
+    liftIO . sequence_ $ zipWith (saveDocumentFrequencies freqDir) splits freqs
 
-    putStrLn $ "Saving stop lists."
-    createTree stopDir
-    saveLines (stopDir </> "top.200")
+    putStrLn' $ "Saving stop lists."
+    liftIO $ createTree stopDir
+    liftIO . saveLines (stopDir </> "top.200")
         . map fst
         . take 200
         . L.sortBy (comparing $ Down . _freqTotal . snd)
@@ -104,9 +90,9 @@ phaedrus pho@PhO{..} = do
         $ _corpusTypes corpus
     forM_ [1..5] $ \n ->
         let filename = stopDir </> decodeString ("count." ++ show n)
-        in  saveFrequency filename n corpus
+        in  liftIO $ saveFrequency filename n corpus
 
-    when (isJust phoEvidenceFile) $ do
+    when (isJust phoEvidenceFile) . liftIO $ do
         (evidence, nonEvidence) <- makeTrainingSet phoTrainingSize
                                                     phoEvidenceRatio
                                                     _splitEvidence
@@ -132,7 +118,7 @@ phaedrus pho@PhO{..} = do
 main :: IO ()
 main =   decodeString <$> getDataDir
      >>= execParser . opts . (</> "data")
-     >>= phaedrus
+     >>= runPhaedrus . phaedrus
 
 
 opts :: FilePath -> ParserInfo PhaedrusOpts
