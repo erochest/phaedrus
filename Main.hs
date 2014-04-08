@@ -4,7 +4,6 @@
 
 -- TODO: fabfile
 -- TODO: JSON description
--- TODO: Script monad (ErrorT IO)
 -- TODO: refactor
 
 
@@ -45,6 +44,19 @@ defaultEvidenceRatio :: Double
 defaultEvidenceRatio = 0.5
 
 
+-- TODO move these into other modules
+
+createTree' :: FilePath -> Phaedrus ()
+createTree' = liftIO . createTree
+
+ls :: FilePath -> Phaedrus [FilePath]
+ls = liftIO . listDirectory
+
+getEvidenceFile :: Maybe FilePath -> Phaedrus (Maybe EvidenceSet)
+getEvidenceFile Nothing = putStrLn' "No evidence file. Skipping." >> return Nothing
+getEvidenceFile (Just ef) = fmap Just . Phaedrus . EitherT $ readEvidence ef
+
+
 phaedrus :: PhaedrusOpts -> Phaedrus ()
 
 phaedrus PhO{ phoVersion = True } =
@@ -54,16 +66,15 @@ phaedrus PhO{ phoOutput = Nothing } =
     putStrLn' "You must specify an output directory."
 
 phaedrus pho@PhO{..} = do
-    liftIO $ createTree dataDir
-    files <- liftIO $ filter (`hasExtension` "xml") <$> listDirectory phoDataDir
+    createTree' dataDir
+    files <- filter (`hasExtension` "xml") <$> ls phoDataDir
 
     putStrLn' $ "Saving data files to " ++ encodeString phoOutput'
-    eset <- maybe (putStrLn' "No evidence file. Skipping." >> return Nothing)
-                  (liftIO . fmap hush . readEvidence)
-                  phoEvidenceFile
+    eset <- getEvidenceFile phoEvidenceFile
 
-    splits <- liftIO . fmap concat . forM files $ \xml -> do
-        tlocs' <- fileToTextLoc xml
+    -- TODO moving everything into the Phaedrus monad here
+    splits <- fmap concat . forM files $ \xml -> do
+        tlocs' <- liftIO $ fileToTextLoc xml
         return . mapMaybe (uncurry (textLocsToSplit phoDivision))
                . zip [1..]
                . concatMap ( window phoWindow phoOffset
@@ -71,18 +82,18 @@ phaedrus pho@PhO{..} = do
                . divideTextLocs phoDivision
                $ maybe tlocs' (`tagEvidence` tlocs') eset
 
-    liftIO $ mapM_ (saveSplit dataDir) splits
+    mapM_ (saveSplit dataDir) splits
 
     putStrLn' $ "Saving frequencies file to " ++ encodeString freqFile
     let (corpus, freqs) = processTfIdf
                         $ map (fmap T.toLower . tokenize . _splitText) splits
-    liftIO $ saveFrequencies freqFile corpus freqs
-    liftIO $ createTree freqDir
-    liftIO . sequence_ $ zipWith (saveDocumentFrequencies freqDir) splits freqs
+    saveFrequencies freqFile corpus freqs
+    createTree' freqDir
+    sequence_ $ zipWith (saveDocumentFrequencies freqDir) splits freqs
 
     putStrLn' $ "Saving stop lists."
-    liftIO $ createTree stopDir
-    liftIO . saveLines (stopDir </> "top.200")
+    createTree' stopDir
+    saveLines (stopDir </> "top.200")
         . map fst
         . take 200
         . L.sortBy (comparing $ Down . _freqTotal . snd)
@@ -90,21 +101,21 @@ phaedrus pho@PhO{..} = do
         $ _corpusTypes corpus
     forM_ [1..5] $ \n ->
         let filename = stopDir </> decodeString ("count." ++ show n)
-        in  liftIO $ saveFrequency filename n corpus
+        in  saveFrequency filename n corpus
 
-    when (isJust phoEvidenceFile) . liftIO $ do
-        (evidence, nonEvidence) <- makeTrainingSet phoTrainingSize
-                                                    phoEvidenceRatio
-                                                    _splitEvidence
-                                                    splits
+    when (isJust phoEvidenceFile) $ do
+        (evidence, nonEvidence) <- liftIO $ makeTrainingSet phoTrainingSize
+                                                            phoEvidenceRatio
+                                                            _splitEvidence
+                                                            splits
         let evidenceDir    = phoOutput' </> "training" </> "evidence"
             nonEvidenceDir = phoOutput' </> "training" </> "non-evidence"
-        createTree evidenceDir
-        createTree nonEvidenceDir
+        createTree' evidenceDir
+        createTree' nonEvidenceDir
 
-        putStrLn $ "Saving " ++ show (length evidence) ++ " chunks as evidence."
+        putStrLn' $ "Saving " ++ show (length evidence) ++ " chunks as evidence."
         mapM_ (saveSplit evidenceDir) evidence
-        putStrLn $  "Saving " ++ show (length nonEvidence)
+        putStrLn' $  "Saving " ++ show (length nonEvidence)
                 ++ " chunks as non-evidence."
         mapM_ (saveSplit nonEvidenceDir) nonEvidence
 

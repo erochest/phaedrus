@@ -12,6 +12,7 @@ module Phaedrus.Output
 
 
 import           Control.Applicative
+import           Control.Monad.IO.Class
 import qualified Data.Char                 as C
 import qualified Data.HashMap.Strict       as M
 import           Data.List                 (foldl', sort, sortBy)
@@ -29,9 +30,9 @@ import           Phaedrus.Types
 import           Phaedrus.Utils
 
 
-saveSplit :: FilePath -> Split -> IO ()
+saveSplit :: FilePath -> Split -> Phaedrus ()
 saveSplit dataDir split =
-    writeTextFile (makeFileName dataDir split "txt") $ _splitText split
+    liftIO . writeTextFile (makeFileName dataDir split "txt") $ _splitText split
 
 makeFileName :: FilePath -> Split -> T.Text -> FilePath
 makeFileName dir Split{..} ext =
@@ -44,9 +45,10 @@ makeFileName dir Split{..} ext =
 saveFrequencies :: FilePath
                 -> Corpus T.Text
                 -> [M.HashMap T.Text (Int, Double)]
-                -> IO ()
+                -> Phaedrus ()
 saveFrequencies filename c docFreqs =
-    writeTextFile filename
+    liftIO
+        . writeTextFile filename
         . T.concat
         . (header:)
         . map row
@@ -68,9 +70,10 @@ saveFrequencies filename c docFreqs =
 saveDocumentFrequencies :: FilePath
                         -> Split
                         -> M.HashMap T.Text (Int, Double)
-                        -> IO ()
+                        -> Phaedrus ()
 saveDocumentFrequencies dir split freqs =
-    writeTextFile (makeFileName dir split "csv")
+    liftIO
+        . writeTextFile (makeFileName dir split "csv")
         . T.concat
         . (header:)
         . map row
@@ -80,10 +83,10 @@ saveDocumentFrequencies dir split freqs =
             T.intercalate "," [token, tshow raw, tshow scaled] <> "\n"
           header = "Token,Raw Frequency,TF-IDF\n"
 
-saveLines :: FilePath -> [T.Text] -> IO ()
-saveLines fp = writeTextFile fp . T.unlines
+saveLines :: FilePath -> [T.Text] -> Phaedrus ()
+saveLines fp = liftIO . writeTextFile fp . T.unlines
 
-saveFrequency :: FilePath -> Int -> Corpus T.Text -> IO ()
+saveFrequency :: FilePath -> Int -> Corpus T.Text -> Phaedrus ()
 saveFrequency fp n =
     saveLines fp
         . sort
