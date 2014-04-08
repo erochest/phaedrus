@@ -8,10 +8,13 @@ module Phaedrus.Output
     , saveDocumentFrequencies
     , saveLines
     , saveFrequency
+    , saveStopLists
+    , saveEvidence
     ) where
 
 
 import           Control.Applicative
+import           Control.Monad
 import           Control.Monad.IO.Class
 import qualified Data.Char                 as C
 import qualified Data.HashMap.Strict       as M
@@ -25,6 +28,7 @@ import           Filesystem.Path.CurrentOS hiding (concat)
 import qualified Filesystem.Path.CurrentOS as FS
 import           Prelude                   hiding (FilePath)
 
+import           Phaedrus.Evidence
 import           Phaedrus.Text.BetaCode    (clean)
 import           Phaedrus.Types
 import           Phaedrus.Utils
@@ -95,3 +99,33 @@ saveFrequency fp n =
         . M.toList
         . _corpusTypes
 
+saveStopLists :: FilePath -> Corpus T.Text -> Phaedrus ()
+saveStopLists stopDir corpus = do
+    putStrLn' $ "Saving stop lists."
+    createTree' stopDir
+    saveLines (stopDir </> "top.200")
+        . map fst
+        . take 200
+        . sortBy (comparing $ Down . _freqTotal . snd)
+        . M.toList
+        $ _corpusTypes corpus
+    forM_ [1..5] $ \n ->
+        let filename = stopDir </> decodeString ("count." ++ show n)
+        in  saveFrequency filename n corpus
+
+saveEvidence :: Int -> Double -> [Split] -> FilePath -> FilePath -> Phaedrus ()
+saveEvidence trainingSize eratio splits outputDir efile = do
+    createTree' evidenceDir >> createTree' nonEvidenceDir
+
+    (evidence, nonEvidence) <- liftIO $ makeTrainingSet trainingSize
+                                                        eratio
+                                                        _splitEvidence
+                                                        splits
+
+    putStrLn' $ "Saving " ++ show (length evidence) ++ " chunks as evidence."
+    mapM_ (saveSplit evidenceDir) evidence
+    putStrLn' $ "Saving " ++ show (length nonEvidence) ++ " chunks as non-evidence."
+    mapM_ (saveSplit nonEvidenceDir) nonEvidence
+
+    where evidenceDir    = outputDir </> "training" </> "evidence"
+          nonEvidenceDir = outputDir </> "training" </> "non-evidence"

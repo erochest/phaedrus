@@ -4,7 +4,6 @@
 
 -- TODO: fabfile
 -- TODO: JSON description
--- TODO: refactor
 
 
 module Main where
@@ -44,19 +43,6 @@ defaultEvidenceRatio :: Double
 defaultEvidenceRatio = 0.5
 
 
--- TODO move these into other modules
-
-createTree' :: FilePath -> Phaedrus ()
-createTree' = liftIO . createTree
-
-ls :: FilePath -> Phaedrus [FilePath]
-ls = liftIO . listDirectory
-
-getEvidenceFile :: Maybe FilePath -> Phaedrus (Maybe EvidenceSet)
-getEvidenceFile Nothing = putStrLn' "No evidence file. Skipping." >> return Nothing
-getEvidenceFile (Just ef) = fmap Just . Phaedrus . EitherT $ readEvidence ef
-
-
 phaedrus :: PhaedrusOpts -> Phaedrus ()
 
 phaedrus PhO{ phoVersion = True } =
@@ -70,17 +56,8 @@ phaedrus pho@PhO{..} = do
     files <- filter (`hasExtension` "xml") <$> ls phoDataDir
 
     putStrLn' $ "Saving data files to " ++ encodeString phoOutput'
-    eset <- getEvidenceFile phoEvidenceFile
-
-    -- TODO moving everything into the Phaedrus monad here
-    splits <- fmap concat . forM files $ \xml -> do
-        tlocs' <- liftIO $ fileToTextLoc xml
-        return . mapMaybe (uncurry (textLocsToSplit phoDivision))
-               . zip [1..]
-               . concatMap ( window phoWindow phoOffset
-                           . concatMap tokenizeTextLoc)
-               . divideTextLocs phoDivision
-               $ maybe tlocs' (`tagEvidence` tlocs') eset
+    splits <-  getEvidenceFile phoEvidenceFile
+           >>= getSplits phoDivision phoWindow phoOffset files
 
     mapM_ (saveSplit dataDir) splits
 
@@ -91,33 +68,11 @@ phaedrus pho@PhO{..} = do
     createTree' freqDir
     sequence_ $ zipWith (saveDocumentFrequencies freqDir) splits freqs
 
-    putStrLn' $ "Saving stop lists."
-    createTree' stopDir
-    saveLines (stopDir </> "top.200")
-        . map fst
-        . take 200
-        . L.sortBy (comparing $ Down . _freqTotal . snd)
-        . M.toList
-        $ _corpusTypes corpus
-    forM_ [1..5] $ \n ->
-        let filename = stopDir </> decodeString ("count." ++ show n)
-        in  saveFrequency filename n corpus
+    saveStopLists stopDir corpus
 
-    when (isJust phoEvidenceFile) $ do
-        (evidence, nonEvidence) <- liftIO $ makeTrainingSet phoTrainingSize
-                                                            phoEvidenceRatio
-                                                            _splitEvidence
-                                                            splits
-        let evidenceDir    = phoOutput' </> "training" </> "evidence"
-            nonEvidenceDir = phoOutput' </> "training" </> "non-evidence"
-        createTree' evidenceDir
-        createTree' nonEvidenceDir
-
-        putStrLn' $ "Saving " ++ show (length evidence) ++ " chunks as evidence."
-        mapM_ (saveSplit evidenceDir) evidence
-        putStrLn' $  "Saving " ++ show (length nonEvidence)
-                ++ " chunks as non-evidence."
-        mapM_ (saveSplit nonEvidenceDir) nonEvidence
+    maybe (return ())
+          (saveEvidence phoTrainingSize phoEvidenceRatio splits phoOutput')
+          phoEvidenceFile
 
     where phoOutput' = fromMaybe "." phoOutput
           dataDir    = phoOutput' </> "data"

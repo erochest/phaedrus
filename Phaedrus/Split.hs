@@ -6,15 +6,23 @@ module Phaedrus.Split
     ( window
     , textLocsToSplit
     , divideTextLocs
+    , getSplits
     ) where
 
 
-import qualified Data.List      as L
-import           Data.Maybe     (fromMaybe)
+import           Control.Monad
+import           Control.Monad.IO.Class
+import qualified Data.List              as L
+import           Data.Maybe             (fromMaybe, mapMaybe)
 import           Data.Ord
-import qualified Data.Text      as T
+import qualified Data.Text              as T
+import Prelude hiding (FilePath)
+import           Filesystem.Path.CurrentOS hiding (concat)
 
+import           Phaedrus.Evidence
+import           Phaedrus.Text.Tokens
 import           Phaedrus.Types
+import           Phaedrus.XML
 
 
 window :: WindowSize -> WindowOffset -> [a] -> [[a]]
@@ -45,4 +53,20 @@ divon Speaking = comparing (_speaker . _tlSpeech)
 
 divcmp :: Division -> TextLoc -> TextLoc -> Bool
 divcmp div a b = divon div a b == EQ
+
+getSplits :: Division
+          -> WindowSize
+          -> WindowOffset
+          -> [FilePath]
+          -> Maybe EvidenceSet
+          -> Phaedrus [Split]
+getSplits division windowSize offset files eset =
+    fmap concat . forM files $ \xml -> do
+        tlocs' <- liftIO $ fileToTextLoc xml
+        return . mapMaybe (uncurry (textLocsToSplit division))
+                . zip [1..]
+                . concatMap ( window windowSize offset
+                            . concatMap tokenizeTextLoc)
+                . divideTextLocs division
+                $ maybe tlocs' (`tagEvidence` tlocs') eset
 

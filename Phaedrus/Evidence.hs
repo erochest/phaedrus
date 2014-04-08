@@ -7,10 +7,12 @@ module Phaedrus.Evidence
     ( readEvidence
     , tagEvidence
     , makeTrainingSet
+    , getEvidenceFile
     ) where
 
 
 import           Control.Applicative
+import           Control.Error
 import           Control.Monad
 import qualified Data.ByteString.Lazy      as BS
 import           Data.Csv
@@ -26,7 +28,7 @@ import           Prelude                   hiding (FilePath, readFile)
 import           Phaedrus.Types
 import           Phaedrus.Utils
 
-import Debug.Trace
+import           Debug.Trace
 
 
 readEvidence :: FilePath -> IO (Either String EvidenceSet)
@@ -72,3 +74,6 @@ makeTrainingSet size ratio p xs = do
 traceIO' :: Show a => a -> IO ()
 traceIO' = traceIO . show
 
+getEvidenceFile :: Maybe FilePath -> Phaedrus (Maybe EvidenceSet)
+getEvidenceFile Nothing = putStrLn' "No evidence file. Skipping." >> return Nothing
+getEvidenceFile (Just ef) = fmap Just . Phaedrus . EitherT $ readEvidence ef

@@ -6,14 +6,18 @@ module Phaedrus.Utils
     , toText'
     , phaedrusIO
     , putStrLn'
+    , createTree'
+    , ls
     ) where
 
 
 import           Control.Error
 import           Control.Monad
-import Control.Monad.Trans.Class
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
 import           Data.Array.IO
 import qualified Data.Text                 as T
+import           Filesystem
 import           Filesystem.Path.CurrentOS
 import qualified Filesystem.Path.CurrentOS as FS
 import           Prelude                   hiding (FilePath)
@@ -52,4 +56,10 @@ phaedrusIO = Phaedrus . scriptIO
 
 putStrLn' :: String -> Phaedrus ()
 putStrLn' = phaedrusIO . putStrLn
+
+createTree' :: FilePath -> Phaedrus ()
+createTree' = liftIO . createTree
+
+ls :: FilePath -> Phaedrus [FilePath]
+ls = liftIO . listDirectory
 
