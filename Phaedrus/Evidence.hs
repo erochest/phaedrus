@@ -20,15 +20,12 @@ import qualified Data.HashSet              as S
 import qualified Data.List                 as L
 import qualified Data.Text                 as T
 import qualified Data.Vector               as V
-import           Debug.Trace
 import           Filesystem
 import           Filesystem.Path.CurrentOS hiding (decode)
 import           Prelude                   hiding (FilePath, readFile)
 
 import           Phaedrus.Types
 import           Phaedrus.Utils
-
-import           Debug.Trace
 
 
 readEvidence :: FilePath -> IO (Either String EvidenceSet)
@@ -70,9 +67,6 @@ makeTrainingSet size ratio p xs = do
           rationl r = truncate . (* r) . fromIntegral . length
           backr :: Double -> [a] -> Int
           backr r = truncate . (/ r) . fromIntegral . length
-
-traceIO' :: Show a => a -> IO ()
-traceIO' = traceIO . show
 
 getEvidenceFile :: Maybe FilePath -> Phaedrus (Maybe EvidenceSet)
 getEvidenceFile Nothing = putStrLn' "No evidence file. Skipping." >> return Nothing

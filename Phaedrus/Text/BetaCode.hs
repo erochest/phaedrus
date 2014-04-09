@@ -20,6 +20,7 @@ import           Control.Error
 import           Data.Attoparsec.Text
 import           Data.Char
 import           Data.Hashable
+import           Data.Maybe
 import           Data.Monoid
 import           Data.String
 import qualified Data.Text               as T
@@ -102,7 +103,7 @@ beta' c d e = (string c <|> string d) *> pure e
 
 sigma :: Parser Char
 sigma = do
-    (char 'S' <|> char 's')
+    char 'S' <|> char 's'
     eow <- endOfWord
     pure $ if eow
                then '\x03c2'
@@ -120,7 +121,7 @@ lowerseq :: Parser Builder
 lowerseq = (<>) <$> (singleton <$> lowercase) <*> diacritics
 
 endOfWord :: Parser Bool
-endOfWord = eow . maybe ' ' id <$> peekChar
+endOfWord = eow . fromMaybe ' ' <$> peekChar
     where eow '.'  = True
           eow ','  = True
           eow ':'  = True

@@ -66,7 +66,7 @@ phaedrus pho@PhO{..} = do
                         $ map (fmap T.toLower . tokenize . _splitText) splits
     saveFrequencies freqFile corpus freqs
     createTree' freqDir
-    sequence_ $ zipWith (saveDocumentFrequencies freqDir) splits freqs
+    zipWithM_ (saveDocumentFrequencies freqDir) splits freqs
 
     saveStopLists stopDir corpus
 
@@ -114,10 +114,10 @@ phopts dataDir =
                    <> long "division"
                    <> reader divisionReader
                    <> value Document
-                   <> help (  "How to divide the document. One of [D]ocument,\
+                   <> help   "How to divide the document. One of [D]ocument,\
                            \ [Se]ction, [P]age, or [Sp]eaking. (The brackets\
                            \ represent an abbreviation for that option.\
-                           \ Default is 'Document.')"))
+                           \ Default is 'Document.')")
     <*> option     (  short 'w'
                    <> long "window"
                    <> value 500
@@ -131,10 +131,10 @@ phopts dataDir =
     <*> mfileOpt   (  short 'e'
                    <> long "evidence"
                    <> metavar "EVIDENCE-FILE"
-                   <> help ( "The optional CSV file listing the evidentiary\
+                   <> help   "The optional CSV file listing the evidentiary\
                            \ sections. Each line lists the dialogue\
                            \ title and the section (using the Latin\
-                           \ alphabet)."))
+                           \ alphabet).")
     <*> option     (  short 't'
                    <> long "training-size"
                    <> metavar "TRAINING-SIZE"

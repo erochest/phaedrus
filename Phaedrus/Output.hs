@@ -101,7 +101,7 @@ saveFrequency fp n =
 
 saveStopLists :: FilePath -> Corpus T.Text -> Phaedrus ()
 saveStopLists stopDir corpus = do
-    putStrLn' $ "Saving stop lists."
+    putStrLn' "Saving stop lists."
     createTree' stopDir
     saveLines (stopDir </> "top.200")
         . map fst

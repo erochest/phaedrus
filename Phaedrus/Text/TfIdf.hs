@@ -61,7 +61,7 @@ processTfIdf docs = (c, map docp docs)
 
 mergeFreqs :: (Hashable a, Eq a)
            => M.HashMap a Int -> M.HashMap a Double -> M.HashMap a (Int, Double)
-mergeFreqs r s = M.intersectionWith (,) r s
+mergeFreqs = M.intersectionWith (,)
 
 tfDoc :: (Hashable a, Eq a) => M.HashMap a Int -> M.HashMap a Double
 tfDoc m = M.map (tf maxf) m

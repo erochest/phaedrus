@@ -40,7 +40,7 @@ shuffle xs = withSystemRandom . asGenIO $ \gen -> do
     where n = length xs
 
           newArray' :: Int -> [a] -> IO (IOArray Int a)
-          newArray' n xs = newListArray (1, n) xs
+          newArray' n = newListArray (1, n)
 
 
 tshow :: Show a => a -> T.Text
