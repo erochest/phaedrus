@@ -10,20 +10,21 @@ module Phaedrus.XML
 
 
 import           Control.Applicative
-import           Control.Error             hiding (just)
+import           Control.Error                hiding (just)
 import           Control.Monad
+import           Control.Monad.Trans.Resource
 import           Data.Conduit
 import           Data.Conduit.List
-import qualified Data.Conduit.List         as CL
-import qualified Data.Maybe                as M
+import qualified Data.Conduit.List            as CL
+import qualified Data.Maybe                   as M
 import           Data.Monoid
 import           Data.Text
-import qualified Data.Text                 as T
+import qualified Data.Text                    as T
 import           Data.Text.Read
 import           Data.XML.Types
 import           Filesystem.Path.CurrentOS
-import           Prelude                   hiding (FilePath)
-import           Text.XML.Stream.Parse     hiding (content)
+import           Prelude                      hiding (FilePath)
+import           Text.XML.Stream.Parse        hiding (content)
 
 import           Phaedrus.Types
 import           Phaedrus.XML.Utils

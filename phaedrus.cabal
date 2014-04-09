@@ -73,6 +73,7 @@ library
                      , lens
                      , mtl
                      , mwc-random
+                     , resourcet
                      , system-fileio
                      , system-filepath
                      , text
@@ -101,6 +102,7 @@ executable phaedrus
                      , lens
                      , mwc-random
                      , optparse-applicative
+                     , resourcet
                      , system-fileio
                      , system-filepath
                      , text

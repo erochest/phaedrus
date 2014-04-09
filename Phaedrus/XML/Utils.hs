@@ -7,11 +7,12 @@ module Phaedrus.XML.Utils
     ) where
 
 
+import           Control.Monad.Trans.Resource
 import           Data.Conduit
-import qualified Data.Conduit.List     as CL
-import qualified Data.DList            as D
+import qualified Data.Conduit.List            as CL
+import qualified Data.DList                   as D
 import           Data.Monoid
-import qualified Data.Text             as T
+import qualified Data.Text                    as T
 import           Data.XML.Types
 import           Prelude
 import           Text.XML.Stream.Parse
