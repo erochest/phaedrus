@@ -11,12 +11,12 @@ module Phaedrus.Split
 
 import           Control.Monad
 import           Control.Monad.IO.Class
-import qualified Data.List              as L
-import           Data.Maybe             (fromMaybe, mapMaybe)
+import qualified Data.List                 as L
+import           Data.Maybe                (fromMaybe, mapMaybe)
 import           Data.Ord
-import qualified Data.Text              as T
-import Prelude hiding (FilePath)
+import qualified Data.Text                 as T
 import           Filesystem.Path.CurrentOS hiding (concat)
+import           Prelude                   hiding (FilePath)
 
 import           Phaedrus.Evidence
 import           Phaedrus.Text.Tokens
