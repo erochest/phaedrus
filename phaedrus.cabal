@@ -61,7 +61,7 @@ library
                      , Phaedrus.XML
                      , Phaedrus.XML.Utils
   -- other-modules:       
-  build-depends:       base >=4.6 && <4.7
+  build-depends:       base >=4.6 && <4.8
                      , array
                      , attoparsec
                      , bytestring
@@ -89,7 +89,7 @@ executable phaedrus
   main-is:             Main.hs
   other-modules:       Paths_phaedrus
   -- other-extensions:    
-  build-depends:       base >=4.6 && <4.7
+  build-depends:       base >=4.6 && <4.8
                      , phaedrus
                      , array
                      , attoparsec
@@ -120,7 +120,7 @@ test-suite phaedrus-specs
   ghc-options:         -threaded -rtsopts
   hs-source-dirs:      specs
   main-is:             Specs.hs
-  build-depends:         base       == 4.6.*
+  build-depends:         base >=4.6 && <4.8
                        , tasty
                        , tasty-golden
                        , tasty-quickcheck
